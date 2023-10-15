@@ -16,7 +16,7 @@ fn main() {
             }
         }
         Commands::List(args) => {
-            if let Some(msg) = list(&args.build, args.target_type).err() {
+            if let Some(msg) = list(&args.build, &args.target_type).err() {
                 eprintln!("{}", msg);
             }
         }

@@ -28,10 +28,11 @@ pub struct ConfigArgs {
 
 #[derive(Args, Debug)]
 pub struct ListArgs {
-    #[arg(default_value_t = String::from("build"))]
+    #[arg(value_enum)]
+    pub target_type: Vec<TargetType>,
+
+    #[arg(short, long, default_value_t = String::from("build"))]
     pub build: String,
-    #[arg(value_enum, default_value_t = TargetType::Executable)]
-    pub target_type: TargetType,
 }
 
 #[derive(ValueEnum, Clone, Debug)]

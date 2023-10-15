@@ -74,7 +74,7 @@ fn index_path(build: &str) -> anyhow::Result<String> {
         .to_string())
 }
 
-pub fn list(build: &str, target_type: TargetType) -> anyhow::Result<()> {
+pub fn list(build: &str, target_types: &[TargetType]) -> anyhow::Result<()> {
     let path = index_path(build)?;
     let index: Index = serde_json::from_reader(std::fs::File::open(path).unwrap())?;
     let path = &index.reply.client_cmoid.codemodel.json_file;
@@ -82,39 +82,14 @@ pub fn list(build: &str, target_type: TargetType) -> anyhow::Result<()> {
 
     for target in codemodel.configurations[0].targets.iter() {
         let target: Target = serde_json::from_reader(read(build, &target.json_file)?)?;
-        if target.target_type == target_type {
+        if target_types.is_empty()
+            || target_types
+                .iter()
+                .any(|target_type| *target_type == target.target_type)
+        {
             println!("{}", target.name);
         }
-        dbg!(target);
     }
-
-    // let codemodel: Vec<&Object> = index
-    //     .objects
-    //     .iter()
-    //     .filter(|object| object.kind == ObjectKind::Codemodel)
-    //     .collect();
-    //
-    // if codemodel.len() > 1 {
-    //     bail!(
-    //         "Index file in {} is corrupted, please run {} again",
-    //         build.bold(),
-    //         "cmoid config".bold()
-    //     );
-    // }
-    // if codemodel.is_empty() {
-    //     bail!(
-    //         "Index file in {} is doesn't contain {}, please run {} again",
-    //         build.bold(),
-    //         "codemodel".underline(),
-    //         "cmoid config".bold()
-    //     );
-    // }
-    //
-    // Safe unwrap since we already made sure that there is exactly 1 codemodel
-    // let codemodel = {
-    //     let reader = std::fs::File::open(format("{}/{}")) * codemodel.first().unwrap();
-    // };
-    // println!("{}", codemodel.json_file);
 
     Ok(())
 }
