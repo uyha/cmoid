@@ -1,25 +1,18 @@
 use clap::Parser;
 use cmoid::{
-    action::{config, list},
+    action::{build, config, list},
     cli::{Cmoid, Commands},
     model::{Codemodel, Index},
 };
 use schemars::schema_for;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let cmoid = Cmoid::parse();
 
     match &cmoid.comamnd {
-        Commands::Config(args) => {
-            if let Some(msg) = config(&args.source, &args.build, &args.options).err() {
-                eprintln!("{}", msg);
-            }
-        }
-        Commands::List(args) => {
-            if let Some(msg) = list(&args.build, &args.target_type).err() {
-                eprintln!("{}", msg);
-            }
-        }
+        Commands::Config(args) => config(&args.source, &args.build, &args.options)?,
+        Commands::List(args) => list(&args.build, &args.target_type)?,
+        Commands::Build(args) => build(&args.build, &args.targets, &args.options)?,
         Commands::Schema { schema } => match schema {
             cmoid::cli::TargetSchema::Index => {
                 let schema = schema_for!(Index);
@@ -37,5 +30,7 @@ fn main() {
             cmoid::cli::TargetSchema::CmakeFiles => todo!(),
             cmoid::cli::TargetSchema::Toolchains => todo!(),
         },
-    }
+    };
+
+    Ok(())
 }

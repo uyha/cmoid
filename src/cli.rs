@@ -13,6 +13,7 @@ pub struct Cmoid {
 pub enum Commands {
     Config(ConfigArgs),
     List(ListArgs),
+    Build(BuildArgs),
     Schema { schema: TargetSchema },
 }
 
@@ -33,6 +34,18 @@ pub struct ListArgs {
 
     #[arg(short, long, default_value_t = String::from("build"))]
     pub build: String,
+}
+
+#[derive(Args, Debug)]
+pub struct BuildArgs {
+    #[arg()]
+    pub targets: Vec<String>,
+
+    #[arg(short, long, default_value_t = String::from("build"))]
+    pub build: String,
+
+    #[arg(last = true)]
+    pub options: Vec<String>,
 }
 
 #[derive(ValueEnum, Clone, Debug)]

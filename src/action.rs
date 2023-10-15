@@ -9,6 +9,16 @@ use glob::GlobError;
 
 use crate::model::{Codemodel, Index, Target, TargetType};
 
+fn cmake() -> Command {
+    let mut command = Command::new("cmake");
+    command
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit());
+
+    command
+}
+
 pub fn config(source: &str, build: &str, options: &[String]) -> anyhow::Result<()> {
     let options = {
         let mut result = options.to_vec();
@@ -27,13 +37,7 @@ pub fn config(source: &str, build: &str, options: &[String]) -> anyhow::Result<(
         build
     ))?;
 
-    Command::new("cmake")
-        .args(options)
-        .stdin(Stdio::inherit())
-        .stdout(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .spawn()?
-        .wait()?;
+    cmake().args(options).spawn()?.wait()?;
 
     Ok(())
 }
@@ -90,6 +94,19 @@ pub fn list(build: &str, target_types: &[TargetType]) -> anyhow::Result<()> {
             println!("{}", target.name);
         }
     }
+
+    Ok(())
+}
+
+pub fn build(build: &str, targets: &[String], options: &[String]) -> anyhow::Result<()> {
+    let mut args = vec![String::from("--build"), build.to_owned()];
+    if !targets.is_empty() {
+        args.push(String::from("--target"));
+        args.extend_from_slice(targets);
+    }
+    args.extend_from_slice(options);
+
+    cmake().args(args).spawn()?.wait()?;
 
     Ok(())
 }
